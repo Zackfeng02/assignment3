@@ -37,6 +37,5 @@ export default gql`
 
   type Query {
     currentUser: User
-    getLatestVitals: VitalSign
   }
 `;

@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-const mongoose = require("mongoose");
-
 const vitalSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   heartRate: { type: Number, required: true, min: 30, max: 250 },
@@ -14,4 +12,4 @@ const vitalSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("VitalSign", vitalSchema);
+export default mongoose.model("VitalSign", vitalSchema);
