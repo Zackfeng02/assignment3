@@ -4,58 +4,56 @@ import { ADD_VITAL_MUTATION, UPDATE_VITAL_MUTATION } from '../graphql/mutations'
 import * as Yup from 'yup';
 import { Button, Form, Modal, Alert } from 'react-bootstrap';
 
+// Validation Schema
 const validationSchema = Yup.object().shape({
-  heartRate: Yup.number()
-    .min(30, 'Too low!')
-    .max(250, 'Too high!')
-    .required('Required'),
+  heartRate: Yup.number().min(30, 'Too low!').max(250, 'Too high!').required('Required'),
   bloodPressure: Yup.object().shape({
-    systolic: Yup.number()
-      .min(50, 'Too low!')
-      .max(250, 'Too high!')
-      .required('Required'),
-    diastolic: Yup.number()
-      .min(30, 'Too low!')
-      .max(150, 'Too high!')
-      .required('Required')
+    systolic: Yup.number().min(50, 'Too low!').max(250, 'Too high!').required('Required'),
+    diastolic: Yup.number().min(30, 'Too low!').max(150, 'Too high!').required('Required'),
   }),
-  temperature: Yup.number()
-    .min(34, 'Too low!')
-    .max(43, 'Too high!')
-    .required('Required'),
-  oxygenSaturation: Yup.number()
-    .min(70, 'Too low!')
-    .max(100, 'Invalid value')
+  temperature: Yup.number().min(34, 'Too low!').max(43, 'Too high!').required('Required'),
+  oxygenSaturation: Yup.number().min(70, 'Too low!').max(100, 'Invalid value'),
 });
 
 export default function VitalForm({ vital, show, onHide }) {
   const [mutate, { loading, error }] = useMutation(
     vital ? UPDATE_VITAL_MUTATION : ADD_VITAL_MUTATION,
-    {
-      refetchQueries: [{ query: GET_VITALS_QUERY }]
-    }
+    { refetchQueries: [{ query: GET_VITALS_QUERY }] }
   );
 
+  // 🛠️ Using Formik for Form Handling
   const formik = useFormik({
     initialValues: {
       heartRate: vital?.heartRate || '',
       bloodPressure: {
         systolic: vital?.bloodPressure?.systolic || '',
-        diastolic: vital?.bloodPressure?.diastolic || ''
+        diastolic: vital?.bloodPressure?.diastolic || '',
       },
       temperature: vital?.temperature || '',
-      oxygenSaturation: vital?.oxygenSaturation || ''
+      oxygenSaturation: vital?.oxygenSaturation || '',
     },
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const variables = vital ? { id: vital.id, input: values } : { input: values };
+        // 🛠️ Ensure values are properly formatted before submission
+        const formattedValues = {
+          ...values,
+          bloodPressure: {
+            systolic: Number(values.bloodPressure.systolic),
+            diastolic: Number(values.bloodPressure.diastolic),
+          },
+          heartRate: Number(values.heartRate),
+          temperature: Number(values.temperature),
+          oxygenSaturation: values.oxygenSaturation ? Number(values.oxygenSaturation) : null,
+        };
+
+        const variables = vital ? { id: vital.id, input: formattedValues } : { input: formattedValues };
         await mutate({ variables });
         onHide();
       } catch (err) {
         console.error(err);
       }
-    }
+    },
   });
 
   return (
@@ -86,7 +84,7 @@ export default function VitalForm({ vital, show, onHide }) {
                 name="bloodPressure.systolic"
                 placeholder="Systolic"
                 type="number"
-                onChange={formik.handleChange}
+                onChange={(e) => formik.setFieldValue("bloodPressure.systolic", e.target.value)}
                 value={formik.values.bloodPressure.systolic}
                 isInvalid={formik.touched.bloodPressure?.systolic && !!formik.errors.bloodPressure?.systolic}
               />
@@ -94,7 +92,7 @@ export default function VitalForm({ vital, show, onHide }) {
                 name="bloodPressure.diastolic"
                 placeholder="Diastolic"
                 type="number"
-                onChange={formik.handleChange}
+                onChange={(e) => formik.setFieldValue("bloodPressure.diastolic", e.target.value)}
                 value={formik.values.bloodPressure.diastolic}
                 isInvalid={formik.touched.bloodPressure?.diastolic && !!formik.errors.bloodPressure?.diastolic}
               />
