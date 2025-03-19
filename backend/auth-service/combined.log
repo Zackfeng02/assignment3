@@ -1,0 +1,2 @@
+{"level":"info","message":"Auth service running on port 4000"}
+{"level":"info","message":"GraphQL endpoint: /graphql"}
