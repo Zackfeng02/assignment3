@@ -1,8 +1,9 @@
 import { gql } from "@apollo/client";
 
-export const GET_LATEST_VITALS = gql`
-  query GetLatestVitals {
-    getLatestVitals {
+export const GET_VITALS_QUERY = gql`
+  query GetVitals {
+    getVitals {
+      id
       heartRate
       bloodPressure {
         systolic
