@@ -1,16 +1,14 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Register from './components/Register';
-import { Container } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
 
-export default function App() {
-  return (
-    <Container className="mt-5">
-      <Routes>
-        <Route path="/auth/login" element={<Login />} />
-        <Route path="/auth/register" element={<Register />} />
-        <Route path="*" element={<Navigate to="/auth/login" />} />
-      </Routes>
-    </Container>
-  );
-}
+const App = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Clear stored JWT
+    navigate("/login");
+  };
+
+  return <button onClick={handleLogout}>Logout</button>;
+};
+
+export default App;

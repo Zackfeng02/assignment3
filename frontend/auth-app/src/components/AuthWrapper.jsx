@@ -1,27 +1,11 @@
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
+import { ApolloClient, InMemoryCache, createHttpLink } from "@apollo/client";
 
-const httpLink = createHttpLink({
-  uri: 'http://localhost:4000/graphql'
+const authServiceLink = createHttpLink({
+  uri: "http://localhost:4000/graphql", // Authentication microservice
+  credentials: "include",
 });
 
-const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem('authToken');
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : ''
-    }
-  };
+export const authClient = new ApolloClient({
+  link: authServiceLink,
+  cache: new InMemoryCache(),
 });
-
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
-});
-
-export const AuthProvider = ({ children }) => (
-  <ApolloProvider client={client}>
-    {children}
-  </ApolloProvider>
-);

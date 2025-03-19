@@ -1,6 +1,6 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
-export const ADD_VITAL_MUTATION = gql`
+export const ADD_VITALS = gql`
   mutation AddVitals($input: VitalSignInput!) {
     addVitals(input: $input) {
       id
@@ -16,7 +16,7 @@ export const ADD_VITAL_MUTATION = gql`
   }
 `;
 
-export const UPDATE_VITAL_MUTATION = gql`
+export const UPDATE_VITALS = gql`
   mutation UpdateVitals($id: ID!, $input: VitalSignInput!) {
     updateVitals(id: $id, input: $input) {
       id
