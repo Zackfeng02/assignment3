@@ -1,4 +1,3 @@
-// src/utils/auth.js
 import jwt from 'jsonwebtoken';
 import { AuthenticationError } from 'apollo-server-express';
 
@@ -31,8 +30,15 @@ export const verifyRefreshToken = (token) => {
 
 // Authentication Middleware
 export const authMiddleware = async (req, res, next) => {
+  const publicRoutes = ["signup", "login"];
+
+  // Allow public routes without authentication
+  if (req.body.operationName && publicRoutes.includes(req.body.operationName)) {
+    return next();
+  }
+
+  // Get token from the authorization header
   const authHeader = req.headers.authorization;
-  
   if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Unauthorized' });
   }

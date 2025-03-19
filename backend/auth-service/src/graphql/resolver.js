@@ -1,4 +1,3 @@
-// auth-service/src/graphql/resolvers.js
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 
@@ -15,7 +14,7 @@ export default {
         { expiresIn: '1h' }
       );
       
-      return { token, user };
+      return { accessToken: token, refreshToken: "", user };
     },
 
     login: async (_, { input }) => {
@@ -30,9 +29,14 @@ export default {
         { expiresIn: '1h' }
       );
 
-      return { token, user };
-    }
+      return { accessToken: token, refreshToken: "", user };
+    },
+
+    logout: async () => {
+      return { message: "Logged out successfully" };
+    },
   },
+
   Query: {
     currentUser: async (_, __, { user }) => {
       if (!user) throw new Error('Not authenticated');

@@ -19,7 +19,15 @@ export default {
       );
       if (!updated) throw new Error('Vital sign not found');
       return updated;
+    },
+
+    getLatestVitals: async (_, __, { user }) => {
+      if (!user) {
+        throw new Error('Authentication required');
+      }
+      return await VitalSign.findOne({ user: user.id }).sort({ timestamp: -1 });
     }
+
   },
   Query: {
     getVitals: async (_, __, { user }) => {

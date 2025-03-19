@@ -14,6 +14,10 @@ export default gql`
     user: User!
   }
 
+  type LogoutResponse {
+    message: String!
+  }
+
   input SignupInput {
     email: String!
     password: String!
@@ -28,10 +32,11 @@ export default gql`
   type Mutation {
     signup(input: SignupInput!): AuthPayload
     login(input: LoginInput!): AuthPayload
-    logout: Boolean
+    logout: LogoutResponse!
   }
 
   type Query {
     currentUser: User
+    getLatestVitals: VitalSign
   }
 `;
