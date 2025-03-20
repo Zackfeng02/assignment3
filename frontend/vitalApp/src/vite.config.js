@@ -20,10 +20,14 @@ export default defineConfig({
     cors: true,
     headers: {
       'Access-Control-Allow-Origin': '*'
+    },
+    fs: {
+      strict: false
     }
   },
   build: {
     target: 'esnext',
-    modulePreload: false
+    modulePreload: false,
+    assetsDir: 'assets'
   }
 });
