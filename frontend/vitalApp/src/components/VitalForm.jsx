@@ -1,3 +1,4 @@
+import React from 'react';
 import { useMutation } from '@apollo/client';
 import { useFormik } from 'formik';
 import { ADD_VITAL_MUTATION, UPDATE_VITAL_MUTATION } from '../graphql/mutations';

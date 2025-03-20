@@ -6,18 +6,24 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: 'container',
-      remotes: {
-        authApp: 'http://localhost:5174/remoteEntry.js',
-        vitalApp: 'http://localhost:5175/remoteEntry.js'
+      name: 'authApp',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './Login': './src/components/Login.jsx',
+        './Register': './src/components/Register.jsx'
       },
       shared: ['react', 'react-dom', 'react-router-dom']
     })
   ],
   server: {
-    port: 5173
+    port: 5174,
+    cors: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    }
   },
   build: {
-    target: 'esnext'
+    target: 'esnext',
+    modulePreload: false
   }
 });

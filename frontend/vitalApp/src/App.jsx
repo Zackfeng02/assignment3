@@ -1,3 +1,4 @@
+import React from "react";
 import { Routes, Route } from 'react-router-dom';
 import VitalList from './components/VitalList';
 import VitalForm from './components/VitalForm';

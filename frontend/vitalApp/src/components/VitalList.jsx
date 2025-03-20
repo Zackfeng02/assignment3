@@ -1,3 +1,4 @@
+import React from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_VITALS_QUERY } from '../graphql/queries';
 import { useState } from 'react';
