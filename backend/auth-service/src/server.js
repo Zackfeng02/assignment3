@@ -1,6 +1,5 @@
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -17,84 +16,91 @@ dotenv.config();
 
 const initializeServer = async () => {
   const app = express();
-  
-  // 1. Database Connection
+
+  // 1️⃣ ✅ Connect to MongoDB
   await connectDB();
 
-  // 2. Security Middleware
-  app.use(helmet({
-    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false
-  }));
-  
-  app.use(cors({
-    origin: process.env.CLIENT_URL,
-    methods: ['POST'],
-    credentials: true
-  }));
+  // 2️⃣ ✅ Apply Security Middleware
+  app.use(
+    helmet({
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    })
+  );
 
-  app.use(rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    standardHeaders: true,
-    legacyHeaders: false
-  }));
+  app.use(
+    cors({
+      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      methods: ['POST'],
+      credentials: true,
+    })
+  );
 
-  // 3. Authentication Middleware
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 200, // limit each IP to 200 requests per windowMs
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
+  );
+
+  // 3️⃣ ✅ Use JSON Middleware
+  app.use(express.json());
+
+  // 4️⃣ ✅ Apply Authentication Middleware
   app.use(authMiddleware);
 
-  // 4. Apollo Server Configuration
+  // 5️⃣ ✅ Configure Apollo Server
   const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
-    validationRules: [
-      depthLimit(5),
-      createComplexityLimitRule(1000)
-    ],
+    validationRules: [depthLimit(5), createComplexityLimitRule(1000)],
     context: ({ req }) => ({ user: req.user }),
     formatError: (error) => {
       logger.error(error);
       return {
         message: error.message,
-        code: error.extensions?.code || 'INTERNAL_SERVER_ERROR'
+        code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
       };
     },
-    plugins: [{
-      async requestDidStart() {
-        return {
-          async didResolveOperation({ request, operationName }) {
-            logger.info(`Operation: ${operationName}`, {
-              query: request.query,
-              variables: request.variables
-            });
-          }
-        };
-      }
-    }]
+    plugins: [
+      {
+        async requestDidStart() {
+          return {
+            async didResolveOperation({ request, operationName }) {
+              logger.info(`Operation: ${operationName}`, {
+                query: request.query,
+                variables: request.variables,
+              });
+            },
+          };
+        },
+      },
+    ],
   });
 
   await apolloServer.start();
-  
-  // 5. Apply Middleware
-  apolloServer.applyMiddleware({ 
+
+  // 6️⃣ ✅ Apply GraphQL Middleware
+  apolloServer.applyMiddleware({
     app,
     path: '/graphql',
-    cors: false
+    cors: false,
   });
 
-  // 6. Health Check Endpoint
+  // 7️⃣ ✅ Health Check Endpoint
   app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
 
-  // 7. Server Initialization
-  const server = app.listen(process.env.PORT, () => {
-    logger.info(`Auth service running on port ${process.env.PORT}`);
-    logger.info(`GraphQL endpoint: ${apolloServer.graphqlPath}`);
+  // 8️⃣ ✅ Start Express Server
+  const server = app.listen(process.env.PORT || 4000, () => {
+    logger.info(`🚀 Auth Service running on port ${process.env.PORT || 4000}`);
+    logger.info(`📌 GraphQL endpoint: ${apolloServer.graphqlPath}`);
   });
 
-  // 8. Graceful Shutdown
+  // 9️⃣ ✅ Graceful Shutdown
   const shutdown = async () => {
     logger.info('Shutting down server...');
     await server.close();
-    await mongoose.disconnect();
     logger.info('Server terminated');
     process.exit(0);
   };
@@ -105,19 +111,19 @@ const initializeServer = async () => {
   return server;
 };
 
-// 9. Error Handling
+// 🔟 ✅ Handle Unexpected Errors
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error);
+  logger.error('❌ Uncaught Exception:', error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
-  logger.error('Unhandled Rejection:', reason);
+  logger.error('❌ Unhandled Rejection:', reason);
   process.exit(1);
 });
 
-// 10. Start Server
+// 🔥 Start the Server
 initializeServer().catch((error) => {
-  logger.error('Failed to initialize server:', error);
+  logger.error('❌ Failed to initialize server:', error);
   process.exit(1);
 });

@@ -30,6 +30,12 @@ export const verifyRefreshToken = (token) => {
 
 // Authentication Middleware
 export const authMiddleware = async (req, res, next) => {
+  
+  // Ensure req.body exists before accessing operationName
+  if (!req.body || typeof req.body !== "object") {
+    return next(); // If req.body is undefined, proceed without blocking
+  }
+  
   const publicRoutes = ["signup", "login"];
 
   // Allow public routes without authentication
